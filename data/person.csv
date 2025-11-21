@@ -1,0 +1,4 @@
+type,id,created_at,created_by,updated_at,updated_by,dob,email,first_name,gender,last_name,phone_number,user_name,bio
+INSTRUCTOR,1,,,,,1995-10-20,yanick.ribeiro23@gmail.com,Ana,F,Souza,+5511988887777,anasouza,OLALA
+INSTRUCTOR,2,,,,,1995-10-20,yanick.ribeinro23@gmail.com,Ana,F,Souza,+5511988887777,anasouza,OLALA
+STUDENT,3,,,,,1992-01-02,gesimango@gmail.com,ge,MALE,simango,844118531,gesimango,

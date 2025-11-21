@@ -1,0 +1,4 @@
+id,created_at,created_by,updated_at,updated_by,email,enabled,password,role,person_id
+1,,,,,yanick.ribeiro23@gmail.com,t,$2a$10$KYICMak6VwfSGqN4I0tyf.e7/9ghiK/ORho/tXE9aas7JYrk0xae2,INSTRUCTOR,1
+2,,,,,yanick.ribeinro23@gmail.com,f,$2a$10$v...IPFqPaw1pr7weGH3CeUwr8rXrNvt8nPidcSaPzJC03amOIGn.,INSTRUCTOR,2
+3,,,,,gesimango@gmail.com,f,$2a$10$HdpIcfnqu8X2HGjJz/QkxuZoRrfNBPG2C1EEfSZ2mFa48RDsEJhXK,STUDENT,3
