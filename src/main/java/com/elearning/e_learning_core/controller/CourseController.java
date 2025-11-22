@@ -262,4 +262,12 @@ public class CourseController {
         List<PriceTypeCountDTO> priceCounts = courseService.getCoursePriceTypesCount();
         return new ApiResponse<>("success", "Price types count retrieved successfully", 200, priceCounts);
     }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<ApiResponse<?>> updateCourseStatus(
+            @PathVariable Long id,
+            @RequestParam StatusCourse status) {
+        ApiResponse<?> response = courseService.updateCourseStatus(id, status);
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
 }

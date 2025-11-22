@@ -3,6 +3,7 @@ package com.elearning.e_learning_core.service;
 import com.elearning.e_learning_core.Dtos.*;
 import com.elearning.e_learning_core.model.*;
 import com.elearning.e_learning_core.Repository.CourseModuleRepository;
+import com.elearning.e_learning_core.Repository.CourseOrderRepository;
 import com.elearning.e_learning_core.Repository.LessonProgressRepository;
 import com.elearning.e_learning_core.Repository.StudentRepository;
 import com.elearning.e_learning_core.config.security.IAuthenticationFacade;
@@ -22,13 +23,16 @@ public class CourseProgressService {
         private final CourseModuleRepository moduleRepository;
         private final LessonProgressRepository lessonProgressRepository;
         private final StudentRepository studentRepository;
+        private final CourseOrderRepository courseOrderRepository;
 
         public CourseProgressService(CourseModuleRepository moduleRepository,
                         LessonProgressRepository lessonProgressRepository,
-                        StudentRepository studentRepository) {
+                        StudentRepository studentRepository,
+                        CourseOrderRepository courseOrderRepository) {
                 this.moduleRepository = moduleRepository;
                 this.lessonProgressRepository = lessonProgressRepository;
                 this.studentRepository = studentRepository;
+                this.courseOrderRepository = courseOrderRepository;
         }
 
         @Autowired
@@ -50,11 +54,13 @@ public class CourseProgressService {
          * Obtém todos os módulos de um curso com as aulas e progresso do estudante
          */
         public List<ModuleWithProgressDTO> getCourseModulesWithStudentProgress(Long courseId, Long studentId) {
-                // Verifica se o estudante existe
-                Long student = getAuthenticatedStudentId();
+                // Verifica se o estudante está inscrito no curso (tem ordem APPROVED)
+                boolean isEnrolled = courseOrderRepository.existsByStudentIdAndCourseIdAndStatus(
+                        studentId, courseId, OrderStatus.APPROVED);
 
-                Student stud = studentRepository.findById(studentId)
-                                .orElseThrow(() -> new RuntimeException("Estudante não encontrado"));
+                if (!isEnrolled) {
+                        throw new RuntimeException("Você não está inscrito neste curso");
+                }
 
                 // Busca todos os módulos do curso
                 List<CourseModule> modules = moduleRepository.findByCourseId(courseId);

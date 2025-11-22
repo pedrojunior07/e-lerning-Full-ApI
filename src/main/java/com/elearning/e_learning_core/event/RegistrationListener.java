@@ -42,8 +42,8 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
         service.createVerificationToken(user, token);
 
         String recipientAddress = user.getEmail();
-        String subject = "Confirmação de Registro - E-Learning";
-        String confirmationUrl = appBaseUrl + "/registrationConfirm?token=" + token;
+        String subject = "🎓 Confirme seu cadastro - E-Learning";
+        String confirmationUrl = appBaseUrl + "/e-learning/api/auth/registrationConfirm?token=" + token;
 
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -53,34 +53,71 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
             helper.setTo(recipientAddress);
             helper.setSubject(subject);
 
+            String userName = user.getPerson().getFirstName() != null
+                ? user.getPerson().getFirstName() + " " + (user.getPerson().getLastName() != null ? user.getPerson().getLastName() : "")
+                : user.getEmail();
+
             String htmlContent = """
                     <html>
-                    <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 30px;">
-                        <div style="max-width: 600px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                            <h2 style="color: #2c3e50;">Bem-vindo à Plataforma E-Learning!</h2>
-                            <p style="font-size: 16px; color: #333;">
-                                Olá <strong>%s</strong>,
-                            </p>
-                            <p style="font-size: 16px; color: #333;">
-                                Obrigado por se registrar. Para concluir seu cadastro, clique no botão abaixo para confirmar seu e-mail:
-                            </p>
-                            <div style="text-align: center; margin: 30px 0;">
-                                <a href="%s" style="background-color: #3498db; color: white; padding: 12px 20px; border-radius: 5px; text-decoration: none; font-size: 16px;">
-                                    Confirmar Cadastro
-                                </a>
+                    <head>
+                        <meta charset="UTF-8">
+                    </head>
+                    <body style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #f8f9fa; padding: 0; margin: 0;">
+                        <div style="max-width: 600px; margin: 40px auto; background-color: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden;">
+
+                            <!-- Header -->
+                            <div style="background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); padding: 40px 30px; text-align: center;">
+                                <h1 style="color: white; margin: 0; font-size: 28px;">🎓 E-Learning</h1>
+                                <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 14px;">Plataforma de Ensino Online</p>
                             </div>
-                            <p style="font-size: 14px; color: #888;">
-                                Se você não realizou esse registro, ignore este e-mail.
-                            </p>
-                            <p style="font-size: 14px; color: #888;">
-                                Atenciosamente,<br>
-                                Equipe E-Learning
-                            </p>
+
+                            <!-- Content -->
+                            <div style="padding: 40px 30px;">
+                                <h2 style="color: #2c3e50; margin: 0 0 20px 0; font-size: 24px;">Bem-vindo(a)!</h2>
+
+                                <p style="font-size: 16px; color: #555; line-height: 1.6; margin: 0 0 15px 0;">
+                                    Olá <strong style="color: #2c3e50;">%s</strong>,
+                                </p>
+
+                                <p style="font-size: 16px; color: #555; line-height: 1.6; margin: 0 0 25px 0;">
+                                    Obrigado por se registrar em nossa plataforma! Estamos muito felizes em tê-lo(a) conosco.
+                                    Para começar sua jornada de aprendizado, confirme seu e-mail clicando no botão abaixo:
+                                </p>
+
+                                <div style="text-align: center; margin: 35px 0;">
+                                    <a href="%s" style="background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); color: white; padding: 16px 40px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: bold; display: inline-block; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+                                        ✓ Confirmar Meu E-mail
+                                    </a>
+                                </div>
+
+                                <p style="font-size: 14px; color: #888; line-height: 1.6; margin: 25px 0 0 0;">
+                                    <strong>Não consegue clicar no botão?</strong><br>
+                                    Copie e cole este link no seu navegador:<br>
+                                    <a href="%s" style="color: #667eea; word-break: break-all;">%s</a>
+                                </p>
+
+                                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+
+                                <p style="font-size: 13px; color: #999; line-height: 1.5; margin: 0;">
+                                    Este link expira em 24 horas. Se você não criou uma conta em nossa plataforma,
+                                    por favor ignore este e-mail.
+                                </p>
+                            </div>
+
+                            <!-- Footer -->
+                            <div style="background-color: #f8f9fa; padding: 25px 30px; text-align: center; border-top: 1px solid #eee;">
+                                <p style="font-size: 14px; color: #666; margin: 0 0 10px 0;">
+                                    <strong>Equipe E-Learning</strong>
+                                </p>
+                                <p style="font-size: 12px; color: #999; margin: 0;">
+                                    © 2024 E-Learning Platform. Todos os direitos reservados.
+                                </p>
+                            </div>
                         </div>
                     </body>
                     </html>
                     """
-                    .formatted(user.getPerson().getFirstName() + " " + user.getPerson().getLastName(), confirmationUrl);
+                    .formatted(userName, confirmationUrl, confirmationUrl, confirmationUrl);
 
             helper.setText(htmlContent, true);
 

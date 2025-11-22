@@ -6,6 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.elearning.e_learning_core.Dtos.CertificateDto;
+import com.elearning.e_learning_core.config.security.AuthenticationFacade;
 import com.elearning.e_learning_core.service.CertificateService;
 
 import java.util.List;
@@ -15,9 +16,11 @@ import java.util.List;
 public class CertificateController {
 
     private final CertificateService certificateService;
+    private final AuthenticationFacade authenticationFacade;
 
-    public CertificateController(CertificateService certificateService) {
+    public CertificateController(CertificateService certificateService, AuthenticationFacade authenticationFacade) {
         this.certificateService = certificateService;
+        this.authenticationFacade = authenticationFacade;
     }
 
     @PostMapping("/issue/{courseId}")
@@ -79,13 +82,10 @@ public class CertificateController {
     @GetMapping("/check/{courseId}")
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<Boolean> hasCertificateForCourse(
-
             @PathVariable Long courseId) {
 
-        // Obtém o ID do estudante autenticado do contexto de segurança
-        // Esta lógica precisaria ser implementada no service
-        // Por enquanto, retornamos um exemplo
-        boolean hasCertificate = certificateService.hasCertificateForCourse(1L, courseId); // Exemplo
+        Long studentId = authenticationFacade.getPrincipal().getPerson().getId();
+        boolean hasCertificate = certificateService.hasCertificateForCourse(studentId, courseId);
         return ResponseEntity.ok(hasCertificate);
     }
 

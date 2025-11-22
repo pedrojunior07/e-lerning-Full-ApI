@@ -39,6 +39,7 @@ import com.elearning.e_learning_core.Repository.LessonProgressRepository;
 import com.elearning.e_learning_core.Repository.LessonRepository;
 import com.elearning.e_learning_core.Repository.PersonRepository;
 import com.elearning.e_learning_core.Repository.PurchaseRepository;
+import com.elearning.e_learning_core.Repository.StudentRepository;
 import com.elearning.e_learning_core.Repository.UserRepository;
 import com.elearning.e_learning_core.config.security.IAuthenticationFacade;
 import com.elearning.e_learning_core.mapper.CertificateMapper;
@@ -81,6 +82,9 @@ public class CourseService {
 
     @Autowired
     PurchaseRepository purchaseRepository;
+
+    @Autowired
+    StudentRepository studentRepository;
 
     @Autowired
     UserRepository userRepository;
@@ -318,7 +322,7 @@ public class CourseService {
         if (courseId == null) {
             course = new Course();
             course.setInstructor((Instructor) principal.getPerson());
-            course.setStatus(Course.StatusCourse.DRAFT);
+            course.setStatus(Course.StatusCourse.PUBLISHED);
             course.setCurrentStep(1);
         } else {
             course = courseRepository.findById(courseId)
@@ -404,6 +408,9 @@ public class CourseService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
         course.setCurrentStep(3);
+
+        logger.info("Saving curriculum for course {} with {} modules", courseId, moduleDtos.size());
+
         for (ModuleDto moduleDto : moduleDtos) {
             CourseModule module = new CourseModule();
             module.setTitle(moduleDto.getTitle());
@@ -415,13 +422,17 @@ public class CourseService {
                 lesson.setTitle(dto.getTitle());
                 lesson.setContent(dto.getContent());
                 lesson.setModule(module);
+                logger.info("Lesson '{}' content: {}", dto.getTitle(),
+                    dto.getContent() != null ? dto.getContent().substring(0, Math.min(100, dto.getContent().length())) : "null");
                 return lesson;
             }).toList();
 
             module.setLessons(lessons);
-            moduleRepository.save(module);
+            CourseModule savedModule = moduleRepository.save(module);
+            logger.info("Saved module '{}' with {} lessons", savedModule.getTitle(), lessons.size());
         }
         Course savedCourse = courseRepository.save(course);
+        logger.info("Curriculum saved successfully for course {}", courseId);
         return new ApiResponse<>("success", "Course updated successfully", 201, Map.of(
                 "courseId", savedCourse.getId(),
                 "currentStep", savedCourse.getCurrentStep()));
@@ -583,9 +594,14 @@ public class CourseService {
     }
 
     public ApiResponse<?> getStudentCourses(Long id, Pageable pageable) {
-        Page<Course> coursesPage = purchaseRepository.fin(id, pageable);
+        // Verificar se o estudante existe
+        if (!studentRepository.existsById(id)) {
+            return new ApiResponse<>("error", "Student not found", 404, null);
+        }
 
-        List<CourseDto> dtos = coursesPage.stream()
+        Page<Course> coursesPage = studentRepository.findCoursesByStudentId(id, pageable);
+
+        List<CourseDto> dtos = coursesPage.getContent().stream()
                 .map(courseMapper::toDtoWithoutModules)
                 .collect(Collectors.toList());
 
@@ -600,7 +616,21 @@ public class CourseService {
                 "totalPages", coursesPage.getTotalPages(),
                 "last", coursesPage.isLast());
 
-        return new ApiResponse("success", "Student courses retrieved", 200, response);
+        return new ApiResponse<>("success", "Student courses retrieved", 200, response);
+    }
+
+    public ApiResponse<?> updateCourseStatus(Long courseId, StatusCourse status) {
+        Course course = courseRepository.findById(courseId)
+                .orElse(null);
+
+        if (course == null) {
+            return new ApiResponse<>("error", "Course not found", 404, null);
+        }
+
+        course.setStatus(status);
+        courseRepository.save(course);
+
+        return new ApiResponse<>("success", "Course status updated to " + status, 200, courseMapper.toDtoWithoutModules(course));
     }
 
     /**

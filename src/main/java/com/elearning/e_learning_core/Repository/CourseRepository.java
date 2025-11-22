@@ -62,7 +62,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
                                 c.category,
                                 c.title,
                                 c.price,
-                                c.id
+                                c.id,
+                                c.status
                         """)
         Page<CourseCardDto> findAllCourseCardsWithLessonCount(
                         @Param("title") String title,
@@ -101,7 +102,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
                                 c.category,
                                 c.title,
                                 c.price,
-                                c.id
+                                c.id,
+                                c.status
                         """)
         Page<CourseCardDto> findCourseCardsByInstructorAndStatus(
                         @Param("title") String title,
@@ -139,7 +141,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
         @Query("SELECT new com.elearning.e_learning_core.Dtos.TopCategoryDTO(c.category.id, c.category.name, COUNT(c.id)) "
                         +
                         "FROM Course c " +
-                        "WHERE c.status = 'DRAFT' " +
+                        "WHERE c.status = 'PUBLISHED' " +
                         "GROUP BY c.category.id, c.category.name " +
                         "ORDER BY COUNT(c.id) DESC")
         List<TopCategoryDTO> findTopCategories();
@@ -161,7 +163,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
                             LEFT JOIN c.modules m
                             LEFT JOIN m.lessons l
                             LEFT JOIN c.students s
-                            WHERE c.status = 'DRAFT'
+                            WHERE c.status = 'PUBLISHED'
                             GROUP BY c.id, c.thumbnailPath, i.firstName, i.lastName, c.category, c.title, c.price, c.status
                             ORDER BY COUNT(DISTINCT s.id) DESC
                         """)
@@ -184,7 +186,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
                             LEFT JOIN c.modules m
                             LEFT JOIN m.lessons l
                             LEFT JOIN c.students s
-                            WHERE c.status = 'DRAFT'
+                            WHERE c.status = 'PUBLISHED'
                               AND (:categoryId IS NULL OR c.category.id = :categoryId)
                               AND (:instructorId IS NULL OR i.id = :instructorId)
                               AND (:minPrice IS NULL OR c.price >= :minPrice)
@@ -209,7 +211,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
         @Query("SELECT c.level, COUNT(c) FROM Course c GROUP BY c.level")
         List<Object[]> countCoursesByLevel();
 
-        @Query("SELECT c.isFree, COUNT(c) FROM Course c WHERE c.status = 'DRAFT' GROUP BY c.isFree")
+        @Query("SELECT c.isFree, COUNT(c) FROM Course c WHERE c.status = 'PUBLISHED' GROUP BY c.isFree")
         List<Object[]> countCoursesByPriceType();
 
         @Query("SELECT COUNT(c) FROM Course c WHERE c.price > 0")

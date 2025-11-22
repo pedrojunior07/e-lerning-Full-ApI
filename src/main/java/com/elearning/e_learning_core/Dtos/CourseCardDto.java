@@ -19,6 +19,7 @@ public class CourseCardDto {
     private Long studentCount;
     private boolean hasLiked;
     private Long likeCount;
+    private Long instructorId;
 
     public CourseCardDto(String thumbnailPath, String discountText, String instructorName, Category category,
             String title, String ratingText, BigDecimal price, long id, Long lessonCount) {
@@ -39,7 +40,7 @@ public class CourseCardDto {
             Category category,
             String title,
             BigDecimal price,
-            Long id,
+            long id,
             Long lessonsCount, Long studentCount, StatusCourse status) {
 
         this.thumbnailPath = thumbnailPath;
@@ -160,5 +161,13 @@ public class CourseCardDto {
     public void setLikeCount(Long likeCount) {
         this.likeCount = likeCount;
     }
-    
+
+    public Long getInstructorId() {
+        return instructorId;
+    }
+
+    public void setInstructorId(Long instructorId) {
+        this.instructorId = instructorId;
+    }
+
 }

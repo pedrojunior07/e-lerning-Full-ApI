@@ -13,7 +13,7 @@ import com.elearning.e_learning_core.model.Category;
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Query("SELECT new com.elearning.e_learning_core.Dtos.CategoryDTO(c.id, c.name, COUNT(cs)) " +
-            "FROM Category c LEFT JOIN c.courses cs WITH cs.status = 'DRAFT' " +
+            "FROM Category c LEFT JOIN c.courses cs WITH cs.status = 'PUBLISHED' " +
             "GROUP BY c.id, c.name ORDER BY COUNT(cs) DESC")
     List<CategoryDTO> countCoursesByCategory();
 

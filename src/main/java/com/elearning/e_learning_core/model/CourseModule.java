@@ -23,7 +23,7 @@ public class CourseModule extends BaseEntity {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Lesson> lessons = new ArrayList<>();
 
     public CourseModule() {

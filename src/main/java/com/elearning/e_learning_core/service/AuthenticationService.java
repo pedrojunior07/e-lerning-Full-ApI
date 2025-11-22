@@ -109,7 +109,7 @@ public class AuthenticationService {
 
         Usr user = usuarioRepository.save(new Usr(
                 person.getEmail(),
-                passwordEncoder.encode(dto.getPassword()), false,
+                passwordEncoder.encode(dto.getPassword()), true,
                 dto.getRole(),
                 person));
 

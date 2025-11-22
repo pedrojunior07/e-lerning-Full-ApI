@@ -7,10 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.elearning.e_learning_core.Dtos.ModuleWithProgressDTO;
+import com.elearning.e_learning_core.config.security.AuthenticationFacade;
 import com.elearning.e_learning_core.service.CourseProgressService;
 
 @RestController
@@ -18,9 +18,11 @@ import com.elearning.e_learning_core.service.CourseProgressService;
 
 public class CourseProgressController {
     private final CourseProgressService courseProgressService;
+    private final AuthenticationFacade authenticationFacade;
 
-    public CourseProgressController(CourseProgressService courseProgressService) {
+    public CourseProgressController(CourseProgressService courseProgressService, AuthenticationFacade authenticationFacade) {
         this.courseProgressService = courseProgressService;
+        this.authenticationFacade = authenticationFacade;
     }
 
     @GetMapping("/{courseId}/students/{studentId}/modules-with-progress")
@@ -54,17 +56,12 @@ public class CourseProgressController {
 
     @GetMapping("/{courseId}/my-modules-with-progress")
     public ResponseEntity<List<ModuleWithProgressDTO>> getMyCourseModulesWithProgress(
-            @PathVariable Long courseId,
+            @PathVariable Long courseId) {
 
-            @RequestParam(required = false) Long studentId) {
-        // Se studentId não for fornecido, usa o estudante autenticado
-        // Você precisará implementar a lógica para obter o studentId do usuário
-        // autenticado
-        // Por enquanto, vamos usar um valor padrão para demonstração
-        Long actualStudentId = studentId != null ? studentId : 1L; // Substitua pela lógica de autenticação
+        Long studentId = authenticationFacade.getPrincipal().getPerson().getId();
 
         List<ModuleWithProgressDTO> modules = courseProgressService
-                .getCourseModulesWithStudentProgress(courseId, actualStudentId);
+                .getCourseModulesWithStudentProgress(courseId, studentId);
 
         return ResponseEntity.ok(modules);
     }

@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../lms"
+		},
+		{
+			"path": "../lms-web"
+		}
+	]
+}

@@ -180,6 +180,20 @@ public class PurchaseService {
                 .collect(Collectors.toList());
     }
 
+    public List<PurchaseDTO> getStudentPurchases(Long studentId) {
+        log.info("Listando compras do estudante {}", studentId);
+        return purchaseRepository.findByStudentId(studentId).stream()
+                .map(purchase -> new PurchaseDTO(
+                        purchase.getId(),
+                        purchase.getAmount(),
+                        purchase.getDataCompra(),
+                        "M-PESA",
+                        purchase.getStudent() != null
+                                ? purchase.getStudent().getFirstName() + " " + purchase.getStudent().getLastName()
+                                : null))
+                .collect(Collectors.toList());
+    }
+
     public ApiResponse<?> validate(String id) {
         log.info("Validando pagamento com externalId={}", id);
 

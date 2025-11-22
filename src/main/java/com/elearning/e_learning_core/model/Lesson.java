@@ -1,5 +1,6 @@
 package com.elearning.e_learning_core.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -12,6 +13,7 @@ public class Lesson extends BaseEntity {
 
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)

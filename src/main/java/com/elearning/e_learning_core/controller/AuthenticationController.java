@@ -63,11 +63,13 @@ public class AuthenticationController {
         ApiResponse<?> response = authenticationService.registerUser(userRegisterDTO);
         if ("error".equalsIgnoreCase(response.getStatus())) {
             return ResponseEntity.status(response.getCode()).body(response);
-        } else {
-            String appUrl = request.getContextPath();
-            eventPublisher.publishEvent(new OnRegistrationCompleteEvent(((Usr) response.getData()),
-                    request.getLocale(), appUrl));
         }
+        // Email desativado temporariamente
+        // else {
+        //     String appUrl = request.getContextPath();
+        //     eventPublisher.publishEvent(new OnRegistrationCompleteEvent(((Usr) response.getData()),
+        //             request.getLocale(), appUrl));
+        // }
 
         return ResponseEntity.status(response.getCode())
                 .body(new ApiResponse<>(response.getStatus(), response.getMessage(), response.getCode(), "null"));
