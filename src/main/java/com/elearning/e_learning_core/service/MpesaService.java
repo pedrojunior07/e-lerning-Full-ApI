@@ -53,7 +53,11 @@ public class MpesaService {
     public ApiResponse<MpesaResponse> processC2BPayment(MpesaC2BRequest request) {
         String url = baseUrl + "/ipg/v1x/c2bPayment/singleStage/";
 
-        logger.info("Iniciando pagamento C2B para: {}", request.getPhoneNumber());
+        logger.info("=== Iniciando pagamento C2B ===");
+        logger.info("URL: {}", url);
+        logger.info("Telefone: {}", request.getPhoneNumber());
+        logger.info("Valor: {}", request.getAmount());
+        logger.info("Referencia: {}", request.getReference());
 
         try {
             ObjectNode requestBody = objectMapper.createObjectNode();
@@ -63,12 +67,18 @@ public class MpesaService {
             requestBody.put("input_TransactionReference", request.getReference());
             requestBody.put("input_ThirdPartyReference", request.getReference());
 
+            logger.info("Request Body: {}", requestBody.toString());
+            logger.info("API Key (primeiros 10 chars): {}...", apiKey.substring(0, Math.min(10, apiKey.length())));
+            logger.info("Service Provider Code: {}", organizationSortCode);
+
             HttpHeaders headers = createHeaders();
             HttpEntity<String> entity = new HttpEntity<>(requestBody.toString(), headers);
 
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 
-            logger.info("Resposta M-Pesa C2B: status={}, body={}", response.getStatusCode(), response.getBody());
+            logger.info("=== Resposta M-Pesa C2B ===");
+            logger.info("Status: {}", response.getStatusCode());
+            logger.info("Body: {}", response.getBody());
 
             if (response.getStatusCode().is2xxSuccessful()) {
                 MpesaResponse mpesaResponse = parseMpesaResponse(response.getBody());
@@ -77,6 +87,12 @@ public class MpesaService {
                 logger.warn("Falha no pagamento C2B. Status: {}", response.getStatusCodeValue());
                 return new ApiResponse<>("error", "Falha ao processar pagamento C2B", response.getStatusCodeValue(), null);
             }
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            logger.error("=== Erro HTTP ao processar pagamento C2B ===");
+            logger.error("Status Code: {}", e.getStatusCode());
+            logger.error("Response Body: {}", e.getResponseBodyAsString());
+            logger.error("Headers: {}", e.getResponseHeaders());
+            return new ApiResponse<>("error", "Erro ao processar pagamento: " + e.getStatusCode() + " " + e.getResponseBodyAsString(), e.getStatusCode().value(), null);
         } catch (Exception e) {
             logger.error("Erro ao processar pagamento C2B: {}", e.getMessage(), e);
             return new ApiResponse<>("error", "Erro ao processar pagamento: " + e.getMessage(), 500, null);
