@@ -19,21 +19,24 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfiguration {
+public class SecurityConfig {
 
     @Autowired
-    SecurityFilter securityFilter;
+    JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public static final String[] ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED = { "/auth/**", "/files/**"
+    public static final String[] ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED = {
+            "/e-learning/api/auth/**",
+            "/files/**"
     };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
+        http.cors(cors -> {});
 
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED).permitAll()
                         .requestMatchers("/instructors/**", "/courses/**").permitAll()
                         .requestMatchers("/students/**", "/meus-cursos/**").permitAll()
@@ -42,7 +45,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.PUT, "/dashboard/stats").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/categories/**").permitAll()
                         .anyRequest().permitAll())
-                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -50,14 +53,10 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(java.util.List.of(
-                "http://localhost:3000",
-                "http://66.23.225.61",
-                "http://192.250.224.214",
-                "http://102.211.186.111",
-                "http://athenarhdlearning.com"));
+        configuration.setAllowedOrigins(java.util.List.of("http://102.211.186.44:8088"));
         configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(java.util.List.of("*"));
+        configuration.setAllowedHeaders(java.util.List.of("Authorization", "Content-Type", "X-Requested-With"));
+        configuration.setExposedHeaders(java.util.List.of("Authorization"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
